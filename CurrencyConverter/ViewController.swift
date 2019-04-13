@@ -16,6 +16,21 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     let currencyArray = ["--","EUR","GBP","USD","AUD", "BRL","CAD","CNY","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","RON","RUB","SEK","SGD","ZAR"]
     var chosen : String = ""
     
+    @IBOutlet weak var currencyLabel: UILabel!
+    @IBOutlet weak var switchState: UISwitch!
+    @IBAction func switchFunc(_ sender: UISwitch) {
+        
+        if sender.isOn == true {
+            
+            currencyLabel.text = "PLN"
+            
+        } else {
+            
+            currencyLabel.text = chosen
+            
+        }
+        
+    }
     @IBOutlet weak var userValue: UITextField!
     @IBOutlet weak var mainLabel: UILabel!
     @IBOutlet weak var currencyPicker: UIPickerView!
@@ -39,6 +54,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         chosen = currencyArray[row]
+        
+        if switchState.isOn == false {
+            
+            currencyLabel.text = chosen
+            
+        }
         print(chosen)
     }
     
@@ -48,6 +69,19 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         userValue.delegate = self
         currencyPicker.delegate = self
         currencyPicker.dataSource = self
+        
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        self.view.endEditing(true)
+        
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        userValue.resignFirstResponder()
+        return(true)
         
     }
     
@@ -62,16 +96,38 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
                 
                 let result = currencyJSON["rates"][self.chosen].doubleValue
                 
-                if self.chosen == "--" || self.userValue.text == "" {
+                if self.chosen == "--" && self.userValue.text == "" {
                     
                     self.mainLabel.text = "Podaj kwotę i wybierz walutę"
                     
-                } else {
+                } else if self.chosen == "--"{
+                    
+                    self.mainLabel.text = "Wybierz walutę"
+                    
+                }
+                    
+                else if self.userValue.text == "" {
+                    
+                    self.mainLabel.text = "Podaj kwotę"
+                    
+                }
+                
+                else if self.switchState.isOn == true {
                     
                     let doubleValue = Double(self.userValue.text!)
                     let labelResult = doubleValue! * result
                     let labelText = String(format: "%.2f", labelResult)
                     self.mainLabel.text = labelText + " " + self.chosen
+                    self.currencyLabel.text = "PLN"
+                    
+                }
+                
+                else {
+                    
+                    let doubleValue = Double(self.userValue.text!)
+                    let labelResult = doubleValue! / result
+                    let labelText = String(format: "%.2f", labelResult)
+                    self.mainLabel.text = labelText + " PLN"
                     
                 }
                 
